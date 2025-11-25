@@ -166,7 +166,7 @@
 
     <div class="container">
         <div class="header">
-            <img src="LOGO_SUTRA_.png" alt="Logo SUTRA" class="logo">
+            <img src="https://migueltobias.github.io/SUTRA/LOGO_SUTRA_.png" alt="Logo SUTRA" class="logo">
             <h1>Apoyo a Remodelación Salón SUTRA</h1>
             <h2>Departamento de Presidencia</h2>
         </div>
@@ -214,6 +214,12 @@
                     <div class="badge">Carmelita</div>
                     <div class="badge">Eva</div>
                     <div class="badge">Elvia</div>
+                     <div class="badge">Thalis</div>
+                     <div class="badge">Almita Cat</div>
+                     <div class="badge">Eli Call</div>
+                     <div class="badge">Lore</div>
+                     <div class="badge">Cynthia</div>
+                    
                 </div>
             </div>
         </div>

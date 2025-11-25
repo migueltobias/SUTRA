@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Participantes - SUTRA Altamira</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            background-color: #ffffff;
+            margin: 0 auto;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border-top: 8px solid #0056b3; /* Color azul institucional/sindical */
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: #0056b3;
+            font-size: 24px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            color: #444;
+            font-size: 18px;
+            margin-top: 10px;
+            font-weight: normal;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .info-box {
+            background-color: #eaf4ff;
+            border-left: 5px solid #0056b3;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .detail-item {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .detail-item strong {
+            display: block;
+            color: #0056b3;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .menu-list {
+            background-color: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .menu-list h3 {
+            margin-top: 0;
+            color: #856404;
+            text-align: center;
+        }
+
+        .menu-list ul {
+            list-style-type: none;
+            padding: 0;
+            text-align: center;
+        }
+
+        .participants-section {
+            background-color: #fcfcfc;
+            padding: 20px;
+            border-top: 2px dashed #ddd;
+        }
+
+        .participants-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .participants-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .badge {
+            background-color: #28a745; /* Verde para indicar "Confirmado" */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .badge::before {
+            content: "✓";
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #343a40;
+            color: white;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <img src="LOGO_SUTRA_.png" alt="Logo SUTRA" class="logo">
+            <h1>Apoyo a Remodelación Salón SUTRA</h1>
+            <h2>Departamento de Presidencia</h2>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <p><strong>Objetivo:</strong> Apoyar con alimentación a los trabajadores que están realizando las labores de remodelación del techo de nuestro Salón SUTRA, siguiendo nuestras tradiciones sindicales.</p>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <strong>📅 Fecha</strong>
+                    Sábado 29 de noviembre, 2025
+                </div>
+                <div class="detail-item">
+                    <strong>⏰ Hora</strong>
+                    11:00 a.m.
+                </div>
+            </div>
+
+            <div class="menu-list">
+                <h3>🍲 Menú a Preparar (Para 30 personas)</h3>
+                <ul>
+                    <li>🐟 20 kg de pescado crudo (listo para preparar)</li>
+                    <li>🍚 Arroz (guarnición)</li>
+                    <li>🥗 Ensalada de lechuga y tomate</li>
+                    <li>🍅 Salsa</li>
+                    <li>🧴 Aceite</li>
+                </ul>
+            </div>
+
+            <div class="participants-section">
+                <div class="participants-title">📋 Compañeros Confirmados</div>
+                <div class="participants-list">
+                    <div class="badge">Benito</div>
+                    <div class="badge">Lily</div>
+                    <div class="badge">Marthita</div>
+                    <div class="badge">Maguito</div>
+                    <div class="badge">Lucy</div>
+                    <div class="badge">Carmelita</div>
+                    <div class="badge">Alejandrina</div>
+                    <div class="badge">Miguel Tobías</div>
+                    <div class="badge">Juanita</div>
+                    <div class="badge">Shayra</div>
+                    <div class="badge">Carmelita</div>
+                    <div class="badge">Eva</div>
+                    <div class="badge">Elvia</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Delegación de Presidencia <br>
+            <strong>SUTRA Altamira – Orgullosamente SUTRA</strong>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>SUTRA | Torneo Relámpago 30º Aniversario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --guinda: #781729;
+      --guinda-oscuro: #430614;
+      --verde-sutra: #4a7a3a;
+      --dorado: #f3c764;
+      --gris-oscuro: #111217;
+      --blanco: #fdfdfd;
+      --texto-suave: #d9d9e3;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(243, 199, 100, 0.2) 0, transparent 55%),
+        radial-gradient(circle at bottom, rgba(74, 122, 58, 0.18) 0, transparent 55%),
+        linear-gradient(135deg, #050509, #1b0c13, #050509);
+      color: var(--texto-suave);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 980px;
+      background: radial-gradient(circle at top left, rgba(243, 199, 100, 0.12) 0, transparent 50%),
+                  rgba(9, 9, 13, 0.9);
+      border-radius: 24px;
+      border: 1px solid rgba(243, 199, 100, 0.25);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.02),
+        0 20px 40px rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(16px);
+      padding: 20px 18px 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 10% 0, rgba(243, 199, 100, 0.12), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(74, 122, 58, 0.25), transparent 55%);
+      opacity: 0.8;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    header {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(243, 199, 100, 0.3);
+      margin-bottom: 18px;
+      z-index: 1;
+    }
+
+    .logo-wrapper {
+      width: 86px;
+      height: 86px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(243, 199, 100, 0.3), rgba(67, 6, 20, 0.9));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      box-shadow:
+        0 0 18px rgba(243, 199, 100, 0.4),
+        0 0 0 1px rgba(0, 0, 0, 0.6);
+      flex-shrink: 0;
+    }
+
+    .logo-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 999px;
+    }
+
+    .headline {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .headline-top {
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(243, 199, 100, 0.85);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .headline h1 {
+      font-family: "Montserrat", system-ui, sans-serif;
+      font-size: clamp(1.2rem, 2.4vw, 1.45rem);
+      text-transform: uppercase;
+      line-height: 1.35;
+      color: var(--blanco);
+    }
+
+    .badge-aniversario {
+      margin-top: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      background: linear-gradient(90deg, var(--guinda), var(--verde-sutra));
+      color: #fff;
+      box-shadow: 0 0 12px rgba(243, 199, 100, 0.32);
+    }
+
+    .badge-aniversario span:first-child {
+      font-weight: 700;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 18px;
+    }
+
+    .card {
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(9, 9, 14, 0.95), rgba(32, 18, 26, 0.96));
+      border: 1px solid rgba(243, 199, 100, 0.18);
+      padding: 16px 14px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.55);
+    }
+
+    .card h2 {
+      font-family: "Montserrat", system-ui, sans-serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--dorado);
+      margin-bottom: 8px;
+    }
+
+    .intro-text {
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .intro-text strong {
+      color: #ffffff;
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .schedule-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      background: radial-gradient(circle at top, rgba(243, 199, 100, 0.22), rgba(67, 6, 20, 0.98));
+      border: 1px solid rgba(243, 199, 100, 0.5);
+      padding: 12px 13px 13px;
+      box-shadow:
+        0 12px 26px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(0, 0, 0, 0.75);
+    }
+
+    .schedule-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 120% -10%, rgba(74, 122, 58, 0.4), transparent 60%);
+      opacity: 0.9;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .schedule-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .schedule-date {
+      font-size: 0.86rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #ffe7b5;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .schedule-date span.emoji {
+      font-size: 1.05rem;
+    }
+
+    .schedule-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.35);
+      color: #fff;
+    }
+
+    .schedule-body {
+      position: relative;
+      z-index: 1;
+      padding-top: 4px;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      margin-bottom: 4px;
+      color: #f6e7ff;
+    }
+
+    .field-row span.icon {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    .match {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 12px;
+      background: rgba(4, 4, 8, 0.6);
+      border: 1px dashed rgba(243, 199, 100, 0.45);
+      font-size: 0.84rem;
+      color: #fff;
+    }
+
+    .match strong {
+      color: var(--dorado);
+    }
+
+    .highlight {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: linear-gradient(135deg, rgba(74, 122, 58, 0.15), rgba(243, 199, 100, 0.08));
+      border: 1px solid rgba(74, 122, 58, 0.55);
+    }
+
+    .highlight strong {
+      color: #ffffff;
+    }
+
+    footer {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(243, 199, 100, 0.32);
+      font-size: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-title {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: rgba(243, 199, 100, 0.95);
+      font-weight: 600;
+    }
+
+    .footer-note {
+      font-size: 0.8rem;
+      color: rgba(230, 230, 243, 0.88);
+    }
+
+    /* Pequeñas animaciones */
+    .glow-pulse {
+      animation: glow 2.8s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        box-shadow: 0 0 0 rgba(243, 199, 100, 0);
+      }
+      50% {
+        box-shadow: 0 0 14px rgba(243, 199, 100, 0.6);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .page {
+        padding: 16px 12px 22px;
+        border-radius: 18px;
+      }
+
+      header {
+        gap: 10px;
+      }
+
+      .logo-wrapper {
+        width: 74px;
+        height: 74px;
+      }
+
+      .headline h1 {
+        font-size: 1.02rem;
+      }
+
+      .badge-aniversario {
+        font-size: 0.7rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <header>
+      <div class="logo-wrapper glow-pulse">
+        <!-- Reemplaza "https://migueltobias.github.io/SUTRA/LOGO_SUTRA_.png" por la ruta real de tu logo -->
+        <img src="https://migueltobias.github.io/SUTRA/LOGO_SUTRA_.png" alt="Logotipo SUTRA Altamira" />
+      </div>
+
+      <div class="headline">
+        <div class="headline-top">SINDICATO ÚNICO DE TRABAJADORES DEL R. AYUNTAMIENTO DE ALTAMIRA</div>
+        <h1>Informativo | Torneo Relámpago de Fútbol · 30º Aniversario SUTRA</h1>
+
+        <div class="badge-aniversario">
+          <span>30 AÑOS</span>
+          <span>de historia, unidad y trabajo sindical</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- Intro -->
+      <section class="card">
+        <h2>continuidad del torneo relámpago</h2>
+        <p class="intro-text">
+          El <strong>Comité Directivo 2025–2028 del SUTRA</strong> informa a toda la comunidad agremiada que
+          nuestro <strong>Torneo Relámpago de Fútbol</strong>, en el marco del <strong>30º Aniversario del Sindicato</strong>,
+          ha dado inicio con gran entusiasmo y una excelente participación de los equipos inscritos.
+        </p>
+      </section>
+
+      <!-- Calendario de partidos -->
+      <section class="card">
+        <h2>próximos encuentros</h2>
+
+        <div class="schedule-grid">
+          <!-- Miércoles 27 -->
+          <article class="schedule-card">
+            <div class="schedule-header">
+              <div class="schedule-date">
+                <span class="emoji">📅</span>
+                <span>Miércoles 27 de noviembre</span>
+              </div>
+              <div class="schedule-label">Jornada 1</div>
+            </div>
+
+            <div class="schedule-body">
+              <div class="field-row">
+                <span class="icon">📍</span>
+                <span><strong>Campo:</strong> Artelli Vía</span>
+              </div>
+              <div class="field-row">
+                <span class="icon">⏰</span>
+                <span><strong>Hora:</strong> 4:30 p.m.</span>
+              </div>
+
+              <div class="match">
+                <span>⚽ <strong>Deportivo Construcción</strong> vs. <strong>Deportivo Comapa</strong></span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Lunes 1 -->
+          <article class="schedule-card">
+            <div class="schedule-header">
+              <div class="schedule-date">
+                <span class="emoji">📅</span>
+                <span>Lunes 1 de diciembre</span>
+              </div>
+              <div class="schedule-label">Jornada 2</div>
+            </div>
+
+            <div class="schedule-body">
+              <div class="field-row">
+                <span class="icon">📍</span>
+                <span><strong>Campo:</strong> Santa Anita</span>
+              </div>
+              <div class="field-row">
+                <span class="icon">⏰</span>
+                <span><strong>Hora:</strong> 4:30 p.m.</span>
+              </div>
+              <div class="match">
+                <span>⚽ <strong>Deportivo Recolección</strong> vs. <strong>Deportes</strong></span>
+              </div>
+
+              <div class="field-row" style="margin-top:8px;">
+                <span class="icon">⏰</span>
+                <span><strong>Hora:</strong> 5:30 p.m.</span>
+              </div>
+              <div class="match">
+                <span>⚽ <strong>Deportivo Misileros</strong> vs. <strong>Cabildo</strong></span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Mensaje final -->
+      <section class="card">
+        <p class="highlight">
+          Este torneo tiene como propósito <strong>fortalecer la convivencia, el compañerismo y la unidad</strong> entre las y los trabajadores municipales,
+          celebrando con orgullo las <strong>tres décadas de historia del SUTRA</strong>.<br /><br />
+          💛 Invitamos a todos los compañeros agremiados a <strong>asistir, apoyar y disfrutar</strong> de esta gran fiesta deportiva sindical.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-title">Comité Directivo SUTRA 2025–2028</div>
+      <div class="footer-note">Por los trabajadores dignos y organizados al servicio de la comunidad.</div>
+    </footer>
+  </div>
+</body>
+</html>

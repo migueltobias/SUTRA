@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#23451f" />
+  <title>Sistema de Control de Asistencia del SUTRA</title>
+  <style>
+    :root {
+      --verde:#23451f;
+      --verde-2:#386641;
+      --olivo:#6b7d32;
+      --olivo-2:#a7c957;
+      --crema:#f8f7ec;
+      --blanco:#ffffff;
+      --texto:#172115;
+      --muted:#65705f;
+      --linea:rgba(35,69,31,.18);
+      --shadow:0 18px 50px rgba(14,42,19,.18);
+      --radius:24px;
+    }
+    * { box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior:smooth; }
+    body {
+      margin:0; font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color:var(--texto); background:
+        radial-gradient(circle at top left, rgba(167,201,87,.32), transparent 34rem),
+        linear-gradient(135deg, #f8f7ec 0%, #eef5dc 45%, #e0ead0 100%);
+      min-height:100vh;
+    }
+    body::before {
+      content:""; position:fixed; inset:0; pointer-events:none; opacity:.22;
+      background-image:linear-gradient(30deg, rgba(35,69,31,.08) 12%, transparent 12.5%, transparent 87%, rgba(35,69,31,.08) 87.5%, rgba(35,69,31,.08)),
+        linear-gradient(150deg, rgba(35,69,31,.08) 12%, transparent 12.5%, transparent 87%, rgba(35,69,31,.08) 87.5%, rgba(35,69,31,.08));
+      background-size:42px 74px;
+    }
+    .app { width:min(1120px,100%); margin:0 auto; padding:18px clamp(14px,3vw,28px) 96px; position:relative; }
+    .hero {
+      position:relative; overflow:hidden; border-radius:32px; padding:22px; min-height:168px; color:#fff;
+      background:linear-gradient(135deg, #1e3c1b 0%, #386641 52%, #6b7d32 100%); box-shadow:var(--shadow);
+      isolation:isolate; animation:enter .65s ease both;
+    }
+    .hero::after {
+      content:""; position:absolute; width:320px; height:320px; border-radius:50%; right:-96px; top:-130px;
+      background:radial-gradient(circle, rgba(255,255,255,.30), rgba(255,255,255,0) 68%); z-index:-1;
+    }
+    .brand { display:flex; gap:16px; align-items:center; }
+    .logoBox { width:76px; height:76px; border-radius:22px; background:rgba(255,255,255,.16); display:grid; place-items:center; flex:0 0 auto; border:1px solid rgba(255,255,255,.34); box-shadow:0 12px 30px rgba(0,0,0,.16); overflow:hidden; }
+    .logoBox img { width:100%; height:100%; object-fit:contain; padding:8px; }
+    h1 { margin:0; font-size:clamp(1.35rem,4.8vw,2.8rem); line-height:1.05; letter-spacing:-.04em; }
+    .subtitle { margin:8px 0 0; opacity:.92; font-size:.98rem; }
+    .statusGrid { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-top:16px; }
+    .card { background:rgba(255,255,255,.92); border:1px solid rgba(255,255,255,.55); border-radius:22px; padding:15px; color:var(--texto); box-shadow:0 12px 30px rgba(16,58,24,.10); backdrop-filter: blur(10px); transform-origin:center; animation:pop .5s ease both; }
+    .card .label { font-size:.75rem; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+    .card .num { margin-top:4px; font-size:clamp(1.45rem,5vw,2.25rem); font-weight:950; line-height:1; color:var(--verde); }
+    .card small { display:block; margin-top:6px; color:var(--muted); font-weight:650; }
+    .progressShell { margin-top:15px; background:rgba(255,255,255,.25); border:1px solid rgba(255,255,255,.32); border-radius:999px; padding:5px; }
+    .progressBar { height:16px; width:0%; border-radius:999px; background:linear-gradient(90deg, #a7c957, #f2e9b8); box-shadow:0 0 0 1px rgba(255,255,255,.32) inset; transition:width .45s cubic-bezier(.2,.8,.2,1); }
+    .panel { margin-top:18px; background:rgba(255,255,255,.83); border:1px solid rgba(255,255,255,.74); border-radius:30px; padding:18px; box-shadow:var(--shadow); backdrop-filter:blur(12px); animation:enter .75s ease both; }
+    .toolbar { display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; }
+    .searchWrap { position:relative; }
+    .searchWrap input { width:100%; border:2px solid transparent; outline:none; border-radius:20px; background:#fff; padding:17px 18px 17px 48px; font-size:1.05rem; box-shadow:inset 0 0 0 1px var(--linea); transition:.2s ease; }
+    .searchWrap input:focus { border-color:var(--olivo-2); box-shadow:0 0 0 5px rgba(167,201,87,.24); }
+    .searchIcon { position:absolute; left:17px; top:50%; transform:translateY(-50%); font-size:1.15rem; }
+    button { border:0; border-radius:18px; padding:14px 16px; font-weight:900; cursor:pointer; transition:transform .12s ease, filter .2s ease, box-shadow .2s ease; font-size:.95rem; }
+    button:active { transform:scale(.97); }
+    .btnPrimary { background:linear-gradient(135deg, var(--verde), var(--verde-2)); color:#fff; box-shadow:0 12px 26px rgba(35,69,31,.22); }
+    .btnSoft { background:#eef4dc; color:var(--verde); box-shadow:inset 0 0 0 1px rgba(35,69,31,.12); }
+    .btnDanger { background:#fff0e6; color:#7c2d12; }
+    .results { display:grid; grid-template-columns:repeat(auto-fit,minmax(285px,1fr)); gap:12px; margin-top:16px; }
+    .worker { background:#fff; border:1px solid var(--linea); border-radius:24px; padding:16px; box-shadow:0 10px 26px rgba(16,58,24,.08); animation:rise .28s ease both; }
+    .workerTop { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .clave { display:inline-flex; align-items:center; gap:6px; padding:7px 10px; background:#eef4dc; color:var(--verde); border-radius:999px; font-weight:950; font-size:.82rem; white-space:nowrap; }
+    .name { font-size:1.02rem; font-weight:950; line-height:1.22; margin:9px 0 0; }
+    .stateTag { margin-top:8px; display:inline-flex; padding:7px 10px; border-radius:999px; font-weight:850; font-size:.82rem; background:#f4f6ef; color:var(--muted); }
+    .stateTag.asistencia { background:#e9f8d6; color:#315d14; }
+    .stateTag.incapacidad { background:#e9f1ff; color:#214c8d; }
+    .stateTag.economico { background:#fff7d6; color:#74570a; }
+    .actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:14px; }
+    .actions button { padding:12px 8px; border-radius:15px; font-size:.82rem; }
+    .aAsis { background:#e9f8d6; color:#315d14; }
+    .aInc { background:#e9f1ff; color:#214c8d; }
+    .aEco { background:#fff7d6; color:#74570a; }
+    .recent { margin-top:18px; display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .miniTitle { font-weight:950; color:var(--verde); margin:0 0 10px; display:flex; justify-content:space-between; gap:8px; }
+    .list { max-height:360px; overflow:auto; padding-right:4px; }
+    .item { display:flex; justify-content:space-between; gap:10px; align-items:center; padding:11px; border-radius:16px; background:#fff; border:1px solid var(--linea); margin-bottom:8px; }
+    .item b { font-size:.9rem; }
+    .item span { color:var(--muted); font-size:.78rem; font-weight:800; }
+    .reportBox { display:none; margin-top:18px; border-radius:24px; background:#fff; border:1px solid var(--linea); overflow:hidden; }
+    .reportBox.show { display:block; }
+    .reportHeader { padding:16px; background:linear-gradient(135deg,#eef4dc,#fff); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+    .reportContent { padding:16px; max-height:520px; overflow:auto; }
+    .sectionTitle { margin:18px 0 8px; color:var(--verde); font-size:1.02rem; }
+    table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    th,td { text-align:left; padding:10px; border-bottom:1px solid #e7edda; }
+    th { background:#f4f7e9; color:var(--verde); position:sticky; top:0; }
+    .toast { position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(20px); opacity:0; background:#1f3b1b; color:#fff; padding:12px 16px; border-radius:999px; box-shadow:0 18px 40px rgba(0,0,0,.25); font-weight:850; z-index:10; transition:.25s ease; pointer-events:none; max-width:92vw; text-align:center; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .empty { padding:24px; text-align:center; color:var(--muted); font-weight:800; }
+    .note { margin-top:10px; color:#41523d; font-size:.85rem; line-height:1.45; background:rgba(255,255,255,.65); border:1px dashed rgba(35,69,31,.25); border-radius:16px; padding:11px 12px; }
+    @keyframes enter { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+    @keyframes pop { from { opacity:0; transform:scale(.96); } to { opacity:1; transform:scale(1); } }
+    @keyframes rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    @media (max-width:860px) {
+      .statusGrid { grid-template-columns:repeat(3,1fr); }
+      .toolbar { grid-template-columns:1fr; }
+      .recent { grid-template-columns:1fr; }
+    }
+    @media (max-width:560px) {
+      .app { padding:12px 11px 90px; }
+      .hero { padding:16px; border-radius:26px; }
+      .brand { align-items:flex-start; gap:12px; }
+      .logoBox { width:62px; height:62px; border-radius:18px; }
+      .statusGrid { grid-template-columns:repeat(2,1fr); gap:9px; }
+      .card { padding:12px; border-radius:18px; }
+      .panel { border-radius:24px; padding:13px; }
+      .results { grid-template-columns:1fr; }
+      .actions { grid-template-columns:1fr; }
+      .searchWrap input { font-size:1rem; padding-top:15px; padding-bottom:15px; }
+      table { font-size:.78rem; }
+      th,td { padding:8px; }
+    }
+    @media print {
+      body { background:#fff; } .hero,.panel>.toolbar,.recent,.note,.toast,.progressShell { display:none!important; }
+      .app { padding:0; } .panel,.reportBox { display:block!important; box-shadow:none; border:0; } .reportContent { max-height:none; overflow:visible; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="brand">
+        <div class="logoBox"><img src="logo.png" alt="Logo SUTRA" onerror="this.style.display='none'; this.parentElement.innerHTML='SUTRA';"></div>
+        <div>
+          <h1>Sistema de Control de Asistencia del SUTRA</h1>
+          <p class="subtitle">Registro rápido por clave o nombre, con reporte final automático.</p>
+        </div>
+      </div>
+      <div class="statusGrid" aria-live="polite">
+        <div class="card"><div class="label">Total trabajadores</div><div class="num" id="totalTrab">0</div><small>Base cargada</small></div>
+        <div class="card"><div class="label">Registrados</div><div class="num" id="totalReg">0</div><small>Con estatus asignado</small></div>
+        <div class="card"><div class="label">Asistencias</div><div class="num" id="totalAsis">0</div><small>Presentes</small></div>
+        <div class="card"><div class="label">Inasistencias</div><div class="num" id="totalInas">0</div><small>No llamados/no marcados</small></div>
+        <div class="card"><div class="label">Incapacidades</div><div class="num" id="totalInc">0</div><small>Justificadas</small></div>
+        <div class="card"><div class="label">Días económicos</div><div class="num" id="totalEco">0</div><small>Permisos</small></div>
+      </div>
+      <div class="progressShell" title="Avance de registro"><div class="progressBar" id="progressBar"></div></div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div class="searchWrap">
+          <span class="searchIcon">🔎</span>
+          <input id="search" type="search" autocomplete="off" placeholder="Buscar por nombre o clave del trabajador..." />
+        </div>
+        <button class="btnSoft" id="btnReport">📋 Generar reporte</button>
+        <button class="btnPrimary" id="btnExport">⬇️ Exportar CSV</button>
+      </div>
+      <div class="note">Modo actual: registro local del navegador. Para que varias personas registren simultáneamente desde distintos celulares en GitHub Pages, se requiere conectar una base en línea como Firebase/Supabase; este archivo ya queda listo para funcionar como interfaz y exportar/importar reportes.</div>
+      <div class="results" id="results"></div>
+
+      <div class="recent">
+        <div>
+          <p class="miniTitle">Últimos registros <button class="btnSoft" id="btnUndo" style="padding:7px 10px;border-radius:12px;font-size:.78rem;">Deshacer último</button></p>
+          <div class="list" id="recentList"></div>
+        </div>
+        <div>
+          <p class="miniTitle">Herramientas <span id="fechaHoy"></span></p>
+          <div class="item"><b>Respaldo JSON</b><button class="btnSoft" id="btnJson">Guardar</button></div>
+          <div class="item"><b>Cargar respaldo</b><input id="importJson" type="file" accept="application/json" style="max-width:145px;"></div>
+          <div class="item"><b>Copiar resumen</b><button class="btnSoft" id="btnCopy">Copiar</button></div>
+          <div class="item"><b>Reiniciar registros</b><button class="btnDanger" id="btnReset">Limpiar</button></div>
+        </div>
+      </div>
+
+      <div class="reportBox" id="reportBox">
+        <div class="reportHeader">
+          <div><b>Reporte final de asistencia SUTRA</b><br><span id="reportMeta"></span></div>
+          <div><button class="btnSoft" onclick="window.print()">🖨️ Imprimir</button></div>
+        </div>
+        <div class="reportContent" id="reportContent"></div>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast"></div>
+
+<script>
+const TRABAJADORES = [{"clave":"00315","nombre":"LORENA PEREZ MUÑIZ"},{"clave":"00441","nombre":"MARIA DE LOURDES ALVARADO MOJICA"},{"clave":"00442","nombre":"MARISOL BARBERENA GONZALEZ"},{"clave":"00001","nombre":"ENRIQUE SALINAS CONTRERAS"},{"clave":"00002","nombre":"HERIBERTO MARTINEZ GARCIA"},{"clave":"00003","nombre":"GERARDO ANTONIO ORTA PACHECO"},{"clave":"00004","nombre":"JOSE SANTOS MORALES VAZQUEZ"},{"clave":"00005","nombre":"MAXIMINO REYES GARCIA"},{"clave":"00006","nombre":"ANDREA CRUZ SOLIS"},{"clave":"00007","nombre":"ARTURO HERNANDEZ ALVAREZ"},{"clave":"00008","nombre":"AGUSTIN CABRIALES OVIEDO"},{"clave":"00009","nombre":"FLORENCIA RAMIREZ MORALES"},{"clave":"00010","nombre":"NORMA DOLORES MENDOZA BANDA"},{"clave":"00011","nombre":"REYES RAMIREZ RODRIGUEZ"},{"clave":"00012","nombre":"DULCE MA DE JESUS RUBIO SILVA"},{"clave":"00013","nombre":"NORA ALICIA REYES REYES"},{"clave":"00014","nombre":"EUSEBIA PEREZ MATA"},{"clave":"00015","nombre":"ELIZABETH CALLES SALAZAR"},{"clave":"00016","nombre":"RIGOBERTO SILVA MAYA"},{"clave":"00017","nombre":"LUZ VICTORIA CARREON RAMOS"},{"clave":"00018","nombre":"MIGUEL QUINTERO MACIAS"},{"clave":"00019","nombre":"JUANA BARTOLO ALONSO"},{"clave":"00020","nombre":"FELIPE MONTES SANCHEZ"},{"clave":"00021","nombre":"ADRIANA WBOLESTANO REYES"},{"clave":"00022","nombre":"GUSTAVO MANUEL ORTA BALDERAS"},{"clave":"00023","nombre":"ISRAEL ASCENCION VILLARREAL"},{"clave":"00024","nombre":"GUADALUPE SALAZAR HERNANDEZ"},{"clave":"00026","nombre":"JOSE GUADALUPE LUGO DIAZ"},{"clave":"00027","nombre":"CARLOS NORIEGA SALAZAR"},{"clave":"00028","nombre":"RAFAEL RUIZ DIAZ"},{"clave":"00029","nombre":"LUCIO GOMEZ CASTRO"},{"clave":"00030","nombre":"JOSE LUIS CASANOVA MAR"},{"clave":"00031","nombre":"JOSE LUIS TORRES VAZQUEZ"},{"clave":"00033","nombre":"GILBERTO CARRIZALES JUAREZ"},{"clave":"00034","nombre":"RIGOBERTO DEL ANGEL LEDEZMA"},{"clave":"00035","nombre":"MARCO ANTONIO ARANDA REYNAGA"},{"clave":"00036","nombre":"SILVERIO COLLAZO RODRIGUEZ"},{"clave":"00037","nombre":"BERTHA HERNANDEZ BALDERAS"},{"clave":"00038","nombre":"RAUL PUGA MACIAS"},{"clave":"00039","nombre":"MARIA LUISA OBREGON CEBALLOS"},{"clave":"00040","nombre":"MIGUEL ANGEL BAEZ DOMINGUEZ"},{"clave":"00042","nombre":"NICOLAS HERNANDEZ RODRIGUEZ"},{"clave":"00043","nombre":"JUAN JOSE DIAZ HERNANDEZ"},{"clave":"00044","nombre":"JUAN CARLOS HERNANDEZ HERNANDEZ"},{"clave":"00045","nombre":"GREGORIO ESCOBAR HERNANDEZ"},{"clave":"00046","nombre":"FRANCISCO RAFAEL BALDERAS ZUÑIGA"},{"clave":"00047","nombre":"JORGE ALFREDO SANCHEZ LOPEZ"},{"clave":"00048","nombre":"JOSE ZUÑIGA VAZQUEZ"},{"clave":"00049","nombre":"GUADALUPE GAMBOA HERNANDEZ"},{"clave":"00050","nombre":"CATALINA CORONA FAJARDO"},{"clave":"00051","nombre":"AMBROSIO GUTIERREZ RIVAS"},{"clave":"00052","nombre":"CONCEPCION RIVERA CELVERA"},{"clave":"00053","nombre":"MA DEL SOCORRO RANGEL CRUZ"},{"clave":"00055","nombre":"SELZO CALDERON COLORADO"},{"clave":"00056","nombre":"FRANCISCO GARCIA CHAVEZ"},{"clave":"00057","nombre":"LUIS BARRAGAN PEREZ"},{"clave":"00058","nombre":"MARIA DEL ROSARIO GONZALEZ PEREZ"},{"clave":"00059","nombre":"RAYMUNDO PEREZ DEL ANGEL"},{"clave":"00060","nombre":"ESMERALDA REYES REYES"},{"clave":"00061","nombre":"ANTONIO VEGA DELGADO"},{"clave":"00062","nombre":"AGUSTINA LEON LARRAGA"},{"clave":"00063","nombre":"MARIA HERMINIA MORALES ARMENDARIZ"},{"clave":"00064","nombre":"GLORIA LARA VILLARREAL"},{"clave":"00065","nombre":"JUANA GUADALUPE CARRIZALES QUILANTAN"},{"clave":"00066","nombre":"J GUADALUPE RODRIGUEZ DELGADO"},{"clave":"00067","nombre":"ANTONIO ARELLANO CERVANTES"},{"clave":"00069","nombre":"EUSTOLIA GARCIA ROCHA"},{"clave":"00070","nombre":"AMPARO HERNANDEZ VEGA"},{"clave":"00071","nombre":"ADELA DIANA MOLINA CAMACHO"},{"clave":"00074","nombre":"AMADO LOPEZ CARRERA"},{"clave":"00075","nombre":"ARMANDO SALAZAR"},{"clave":"00076","nombre":"JUAN PEDRO RAMOS CORTES"},{"clave":"00078","nombre":"RAYMUNDO RAMOS BAUTISTA"},{"clave":"00079","nombre":"RUBEN SALAZAR HERNANDEZ"},{"clave":"00080","nombre":"SAUL LERMA CASTRO"},{"clave":"00081","nombre":"ABUNDIO CASTRO MORALES"},{"clave":"00082","nombre":"ANCELMO MORENO VELAZQUEZ"},{"clave":"00084","nombre":"GUADALUPE HERNANDEZ CERVANTES"},{"clave":"00085","nombre":"VICTOR MANUEL CEBALLOS PASTRANA"},{"clave":"00086","nombre":"MIGUEL BAEZ AMARO"},{"clave":"00087","nombre":"RAUL BAEZ PEREZ"},{"clave":"00088","nombre":"JOSE LUIS REYNOSO GAMEZ"},{"clave":"00089","nombre":"LAZARO GABRIEL SANTIAGO"},{"clave":"00090","nombre":"RICARDO PEREZ MATA"},{"clave":"00093","nombre":"RUFINO CRUZ RUBIO"},{"clave":"00094","nombre":"CONRADO CASTILLO SANCHEZ"},{"clave":"00095","nombre":"JOSE MANUEL MARQUEZ GARCIA"},{"clave":"00096","nombre":"JULIAN HERNANDEZ TURRUBIATES"},{"clave":"00097","nombre":"ERNESTO VAZQUEZ AGUILAR"},{"clave":"00098","nombre":"RUBEN LEDEZMA JAQUIS"},{"clave":"00100","nombre":"FEDERICO PEREZ BANDA"},{"clave":"00102","nombre":"FRANCISCO LEONEL MORALES CARETA"},{"clave":"00103","nombre":"JORGE AGUILAR FLORES"},{"clave":"00104","nombre":"FELIPE DE JESUS CASTILLO SUASTE"},{"clave":"00105","nombre":"GUILLERMO RIVADENEIRA GUERRERO"},{"clave":"00106","nombre":"MA GUADALUPE LARA GUZMAN"},{"clave":"00107","nombre":"JUAN MARTIN LOPEZ ZAPATA"},{"clave":"00108","nombre":"ALEJANDRO SAN MARTIN SANTIAGO"},{"clave":"00109","nombre":"GRACIELA CERVANTES CEPEDA"},{"clave":"00110","nombre":"SANTOS MATA"},{"clave":"00111","nombre":"CARLOS MONTOYA CALDERON"},{"clave":"00112","nombre":"ALEJANDRINA PEREZ JACOBO"},{"clave":"00113","nombre":"ERNESTO RIVERA HERNANDEZ"},{"clave":"00114","nombre":"INES TORRES YAÑEZ"},{"clave":"00117","nombre":"EDGAR ESCOBEDO PEREZ"},{"clave":"00118","nombre":"FELIX ARREDONDO IZAGUIRRE"},{"clave":"00119","nombre":"ARTURO VILLAFUERTE BEDOLLA"},{"clave":"00120","nombre":"JOSE MANUEL VARGAS GARCES"},{"clave":"00121","nombre":"RUBEN ZUÑIGA MARTINEZ"},{"clave":"00122","nombre":"J CIPRIANO MARTINEZ MOCTEZUMA"},{"clave":"00124","nombre":"ROSA ISELA CASTRO SAN JUAN"},{"clave":"00125","nombre":"AGUSTIN CASTILLO HERNANDEZ"},{"clave":"00126","nombre":"JOSE ELIAS LOPEZ MELENDEZ"},{"clave":"00127","nombre":"MA BERENICE ORDOÑEZ CRUZ"},{"clave":"00129","nombre":"BEATRIZ BAÑUELOS JIMENEZ"},{"clave":"00130","nombre":"RAFAEL REYES GUERRERO"},{"clave":"00131","nombre":"JOSE GUADALUPE HERNANDEZ HERNANDEZ"},{"clave":"00132","nombre":"NORMA ANTONIA DAVILA RIVAS"},{"clave":"00133","nombre":"MIGUEL ANGEL RODRIGUEZ ESPINOSA"},{"clave":"00134","nombre":"FABIOLA SANTOS ROSAS"},{"clave":"00135","nombre":"VICTOR HUGO OLVERA LARA"},{"clave":"00136","nombre":"ESTEBAN BRIGIDO RODRIGUEZ CASTRO"},{"clave":"00137","nombre":"J FEDERICO AGUILAR AGUILLON"},{"clave":"00139","nombre":"MA DOMINGA BADILLO BADILLO"},{"clave":"00140","nombre":"ADEL BARRIENTOS VANEGAS"},{"clave":"00141","nombre":"AMBROSIO PORTES JUAREZ"},{"clave":"00143","nombre":"EMILIO GARCIA GUERRERO"},{"clave":"00144","nombre":"PEDRO EMMANUEL MORALES AGUIAR"},{"clave":"00145","nombre":"JUAN ANTONIO ESCOBEDO FLORES"},{"clave":"00146","nombre":"MARGARITA MUÑIZ MONCAYO"},{"clave":"00147","nombre":"GABRIEL MATEOS ANASTACIO"},{"clave":"00148","nombre":"CARLOS MAURICIO DEMES BARRON"},{"clave":"00150","nombre":"NOE BARBOSA RODRIGUEZ"},{"clave":"00151","nombre":"MARGARITA RODRIGUEZ MARTINEZ"},{"clave":"00152","nombre":"MAYOLA GOMEZ LARA"},{"clave":"00153","nombre":"MARTHA LAURA CRUZ PONCE"},{"clave":"00154","nombre":"FERNANDO GAMEZ ZUÑIGA"},{"clave":"00155","nombre":"SOLEDAD DEL ANGEL AGUSTIN"},{"clave":"00156","nombre":"NORMA GUADALUPE LARA AVILES"},{"clave":"00157","nombre":"JOSE ALFREDO PEREZ CAMPOS"},{"clave":"00160","nombre":"FERNANDO RAMIREZ MARTINEZ"},{"clave":"00162","nombre":"SONIA CATALINA LARA MALDONADO"},{"clave":"00163","nombre":"MARIO CASANOVA MAR"},{"clave":"00164","nombre":"OVIDIO CARDIEL CASTILLO"},{"clave":"00165","nombre":"AURORA SALVADOR SALVADOR"},{"clave":"00166","nombre":"SERGIO AGUILAR PEREZ"},{"clave":"00167","nombre":"JAVIER ESPINOSA SOSA"},{"clave":"00168","nombre":"TEODULO SANCHEZ MANCILLA"},{"clave":"00169","nombre":"MA AMPARO VAZQUEZ HERNANDEZ"},{"clave":"00170","nombre":"SINDY YAZMIN HERNANDEZ CASTILLO"},{"clave":"00171","nombre":"MA ANTONIA BONILLA CORONADO"},{"clave":"00172","nombre":"CRUZ ADRIANA GOMEZ LOREDO"},{"clave":"00173","nombre":"LUCIA RODRIGUEZ HERNANDEZ"},{"clave":"00174","nombre":"CONSUELO DOMINGUEZ MARTINEZ"},{"clave":"00175","nombre":"ANASTACIO CASTILLO TREVIÑO"},{"clave":"00176","nombre":"ADRIAN VARGAS MARTINEZ"},{"clave":"00177","nombre":"EDNA LUCIA REYES BERLAJE"},{"clave":"00178","nombre":"EDER IVAN ZUÑIGA FREGOSO"},{"clave":"00179","nombre":"MARTIN SOSA CARRIZALES"},{"clave":"00180","nombre":"JOSE LUIS PECINA PECINA"},{"clave":"00181","nombre":"MARIA DEL CARMEN GARCIA PEREZ"},{"clave":"00182","nombre":"IGNACIO GONZALEZ HERNANDEZ"},{"clave":"00183","nombre":"ALMA LUZ SANCHEZ SANCHEZ"},{"clave":"00184","nombre":"AGUSTIN ZUÑIGA VILLANUEVA"},{"clave":"00185","nombre":"J JUAN TELLO"},{"clave":"00186","nombre":"ALFREDO LEAL TABARES"},{"clave":"00187","nombre":"FLORENTINO ROMAN BLANCO"},{"clave":"00189","nombre":"GERMAN FELIX VILLANUEVA"},{"clave":"00190","nombre":"SERGIO FLORES GARCIA"},{"clave":"00191","nombre":"RAYMUNDO GOMEZ CASTRO"},{"clave":"00192","nombre":"MARTHA ALEMAN RODRIGUEZ"},{"clave":"00193","nombre":"DIANA ANGELICA LANDA GUZMAN"},{"clave":"00194","nombre":"JULIAN HERNANDEZ MENDOZA"},{"clave":"00195","nombre":"JOAQUIN ANTONIO TREVIÑO TREJO"},{"clave":"00196","nombre":"FRANCISCO CERVANTES MALDONADO"},{"clave":"00197","nombre":"JOSE CARLOS VAZQUEZ AGUILAR"},{"clave":"00198","nombre":"NOE ESPINO MARTINEZ"},{"clave":"00199","nombre":"JUAN GUADALUPE DEL ANGEL"},{"clave":"00200","nombre":"HERMELINDO MARQUEZ RIOS"},{"clave":"00201","nombre":"SANTIAGO ORTEGA HERNANDEZ"},{"clave":"00202","nombre":"J SANTOS CASTILLO REYES"},{"clave":"00203","nombre":"FRANCO SOSA DEL ANGEL"},{"clave":"00204","nombre":"SILVIA CRUZ PORTALES"},{"clave":"00205","nombre":"MARIA GABRIELA QUIROZ PEREZ"},{"clave":"00206","nombre":"RAMON ZUÑIGA MARTINEZ"},{"clave":"00207","nombre":"RODOLFO NIETO GONZALEZ"},{"clave":"00208","nombre":"JOSE LUIS HERNANDEZ AHUMADA"},{"clave":"00209","nombre":"ERICK ARTURO BALDOMERO DEL ANGEL"},{"clave":"00210","nombre":"DAMIAN SALAZAR HUERTA"},{"clave":"00211","nombre":"JORGE ANTONIO PEREZ CASTILLO"},{"clave":"00212","nombre":"EFREN FLORES HERNANDEZ"},{"clave":"00213","nombre":"FERNANDO BECERRA SANCHEZ"},{"clave":"00214","nombre":"ORALIA SOSA CRUZ"},{"clave":"00215","nombre":"ROSA ELISA ORTEGA OBREGON"},{"clave":"00216","nombre":"RITA ESCOBAR JIMENEZ"},{"clave":"00217","nombre":"JUAN CARLOS LOPEZ GONZALEZ"},{"clave":"00218","nombre":"JUANA ILEANA MARTINEZ BLANCO"},{"clave":"00219","nombre":"LUIS MIGUEL ZUÑIGA CIBRIAN"},{"clave":"00220","nombre":"JUANA GARCIA GONZALEZ"},{"clave":"00221","nombre":"CARLOS ESTEBAN RODRIGUEZ GUERRERO"},{"clave":"00222","nombre":"MARGARITA ALICIA ORTA HERRERA"},{"clave":"00223","nombre":"CARLOS ALBERTO VAZQUEZ ROSAS"},{"clave":"00224","nombre":"AMELIA GUADALUPE GAMEZ MORALES"},{"clave":"00225","nombre":"ANA MACRINA MUÑIZ BADILLO"},{"clave":"00226","nombre":"JOSE ALONSO HERNANDEZ"},{"clave":"00227","nombre":"ENEIDA GUADALUPE SANCHEZ PEREZ"},{"clave":"00228","nombre":"MARTHA VIRGINIA BALDERAS REYES"},{"clave":"00229","nombre":"JORGE RIVAS MEDINA"},{"clave":"00230","nombre":"VICTOR MANUEL RIVERA CASTRO"},{"clave":"00231","nombre":"ROBERTO ANTONIO LEDEZMA SANTIAGO"},{"clave":"00232","nombre":"MARTIN JARAMILLO ESPINOSA"},{"clave":"00233","nombre":"NICOLAS CAMACHO MALDONADO"},{"clave":"00234","nombre":"CUPERTINO GRANILLO MARTINEZ"},{"clave":"00235","nombre":"JOSE DOMINGO GREGORIO SILGUERO"},{"clave":"00236","nombre":"DANIA SOSA CRUZ"},{"clave":"00237","nombre":"EVARISTA RUIZ HERNANDEZ"},{"clave":"00238","nombre":"ROSALIA REYES MENDO"},{"clave":"00239","nombre":"IGNACIO MANRIQUEZ COVARRUBIAS"},{"clave":"00240","nombre":"MARTIN LEONARDO MANRIQUES COVARRUBIAS"},{"clave":"00241","nombre":"ANACLETO BARRIOS ORTEGA"},{"clave":"00243","nombre":"ARNOLDO VELAZQUEZ CASTILLO"},{"clave":"00244","nombre":"MA DE LOURDES MENDOZA HERNANDEZ"},{"clave":"00245","nombre":"ZORAIDA BALDERAS CRUZ"},{"clave":"00246","nombre":"JOSE CATARINO ALVAREZ LOPEZ"},{"clave":"00247","nombre":"JOSE ALFREDO GOMEZ CASTRO"},{"clave":"00248","nombre":"DAVID GOMEZ CASTRO"},{"clave":"00249","nombre":"MARIA GUADALUPE ALONSO RESENDEZ"},{"clave":"00250","nombre":"ELVIA NOHEMI TORRES VEGA"},{"clave":"00251","nombre":"MARTHA LETICIA SALAZAR RAMIREZ"},{"clave":"00252","nombre":"MIGUEL ANGEL RAMIREZ RODRIGUEZ"},{"clave":"00253","nombre":"SOCORRO RAMIREZ JUAREZ"},{"clave":"00254","nombre":"JULIA MUÑOZ PECINA"},{"clave":"00255","nombre":"JOSE REYES MUNGUIA CASTILLO"},{"clave":"00256","nombre":"MARGARITO CASTILLO LOPEZ"},{"clave":"00257","nombre":"MIGUEL ANGEL ZUÑIGA CASTILLO"},{"clave":"00259","nombre":"MARIA ISABEL GOMEZ LARA"},{"clave":"00260","nombre":"ARMANDO ARRAÑAGA PEREZ"},{"clave":"00261","nombre":"NOE GARCIA MORALES"},{"clave":"00262","nombre":"SERVANDO HERNANDEZ YAÑEZ"},{"clave":"00263","nombre":"FAUSTINO RAMOS JIMENEZ"},{"clave":"00264","nombre":"JORGE ARMANDO HERNANDEZ ANTONIO"},{"clave":"00265","nombre":"ERNESTO ZALETA NICACIO"},{"clave":"00266","nombre":"ISAIAS COLLAZO MIRELES"},{"clave":"00267","nombre":"EDUARDO TORRES AMARO"},{"clave":"00268","nombre":"MARCO POLO RAMIREZ MARTINEZ"},{"clave":"00269","nombre":"BRENDA CECILIA MARTINEZ CHAVEZ"},{"clave":"00271","nombre":"JOSE GUADALUPE BARRIOS ORTEGA"},{"clave":"00272","nombre":"JOSE LUIS VAZQUEZ AGUILAR"},{"clave":"00273","nombre":"MOISES MATA PEREZ"},{"clave":"00274","nombre":"OTHON ALVAREZ PINTOR"},{"clave":"00275","nombre":"CYNTHIA ADRIANA ZEPEDA DEMIS"},{"clave":"00276","nombre":"MARIA GARCIA ROCHA"},{"clave":"00277","nombre":"JUAN ESPINOSA FLORES"},{"clave":"00278","nombre":"MAYRA MANDUJANO MONTELONGO"},{"clave":"00279","nombre":"ISSA IRASEMA ECHEVARRIA CABALLERO"},{"clave":"00280","nombre":"JOSE DE JESUS CERVANTES COVARRUBIAS"},{"clave":"00281","nombre":"MARIA ELENA VILLAFUERTE BEDOLLA"},{"clave":"00282","nombre":"GREGORIO ALEJANDRO MARTINEZ PEREZ"},{"clave":"00283","nombre":"BENITO ABAUNZA SOTO"},{"clave":"00284","nombre":"MARTIN ALBERTO ESPINOSA ROSAS"},{"clave":"00285","nombre":"EDNA PAOLA NIETO HERNANDEZ"},{"clave":"00286","nombre":"DAVID ROCHA GUZMAN"},{"clave":"00287","nombre":"AVILENE ARREDONDO IZAGUIRRE"},{"clave":"00288","nombre":"HECTOR HUGO DEMES BARRON"},{"clave":"00289","nombre":"MIGUEL ANGEL CAMACHO ESPRIELLA"},{"clave":"00290","nombre":"ISMAEL DEL ANGEL DEL ANGEL"},{"clave":"00291","nombre":"FRANCISCO DIAZ HERNANDEZ"},{"clave":"00292","nombre":"ANA LAURA GAMEZ GARCIA"},{"clave":"00293","nombre":"JOSE MANUEL TORRES YAÑEZ"},{"clave":"00294","nombre":"JESUS RAUL OLVERA MENDEZ"},{"clave":"00295","nombre":"ERNESTO CABALLERO OBREGON"},{"clave":"00296","nombre":"MARIA DEL ROSARIO CALLES SALAZAR"},{"clave":"00297","nombre":"JOSE ADRIAN GOMEZ RODRIGUEZ"},{"clave":"00298","nombre":"ELEAZAR HERNANDEZ REYES"},{"clave":"00299","nombre":"FRANCISCO MANUEL HERNANDEZ MARES"},{"clave":"00300","nombre":"NOE RANGEL RODRIGUEZ"},{"clave":"00301","nombre":"RUBEN DARIO AREGULLIN SANCHEZ"},{"clave":"00302","nombre":"JUAN MIGUEL PEREZ GONZALEZ"},{"clave":"00303","nombre":"TEODORO CARRIZALES BARRAGAN"},{"clave":"00304","nombre":"JUAN DOMINGO CEBALLOS PASTRAN"},{"clave":"00305","nombre":"JOSE JUAN GUADALUPE RAMIREZ"},{"clave":"00306","nombre":"JOSE EDUARDO CUERVO CONTRERAS"},{"clave":"00307","nombre":"JUAN ANGEL GARROCHO REYES"},{"clave":"00308","nombre":"XOCHITL REYES MENDO"},{"clave":"00309","nombre":"FLORINDA TADEO ROMAN"},{"clave":"00310","nombre":"ENEMECIO MARTINEZ HERNANDEZ"},{"clave":"00311","nombre":"VICTOR HUGO VITE"},{"clave":"00312","nombre":"AURELIO RODRIGUEZ JIMENEZ"},{"clave":"00313","nombre":"JOSE ANTONIO HERNANDEZ RODRIGUEZ"},{"clave":"00314","nombre":"JUAN DIEGO ARREAGA FERNANDEZ"},{"clave":"PS001","nombre":"TERESA DE JESUS BLANCO TAVERA"},{"clave":"PS002","nombre":"MA CRISTINA MATA OLAVID"},{"clave":"PS003","nombre":"IGNACIA RODRIGUEZ GONZALEZ"},{"clave":"PS004","nombre":"ROSA CARMINA MARTINEZ HERNANDEZ"},{"clave":"PS005","nombre":"FILIBERTO YAÑEZ REYES"},{"clave":"PS008","nombre":"ALFREDO CASTELLANOS TORRES"},{"clave":"PS010","nombre":"TERESA MARTINEZ CHAVEZ"},{"clave":"PS011","nombre":"MARIA DOLORES MOJICA LOPEZ"},{"clave":"PS014","nombre":"JUAN TORRES VAZQUEZ"},{"clave":"PS015","nombre":"PATRICIO BARON CRUZ"},{"clave":"PS016","nombre":"CELINA RAMIREZ PEÑA"},{"clave":"PS017","nombre":"MARIA DEL CARMEN HERNANDEZ VEGA"},{"clave":"PS018","nombre":"OLIVIA RODRIGUEZ BARTOLO"},{"clave":"PS021","nombre":"CARMEN LIDIA GUTIERREZ SOBREVILLA"},{"clave":"PS022","nombre":"MARIA SILVIANA HERNANDEZ BAUTISTA"},{"clave":"PS024","nombre":"ROBERTO CUERVO SALAS"},{"clave":"PS025","nombre":"JUAN REYES RUIZ"},{"clave":"PS028","nombre":"ELISA CASTILLO ZUÑIGA"},{"clave":"PS031","nombre":"MARTHA MONTOYA MAYORGA"},{"clave":"PS032","nombre":"HONORIA IZAGUIRRE MARTINEZ"},{"clave":"PS034","nombre":"DIANA LUZ GUZMAN SANDOVAL"},{"clave":"PS035","nombre":"MARIA ELENA RICO ROQUE"},{"clave":"PS036","nombre":"SOCORRO ESCAMILLA CASTELLANOS"},{"clave":"PS037","nombre":"MARTHA PASCUAL DOMINGUEZ"},{"clave":"PS038","nombre":"ISAIAS REYES GERONIMO"},{"clave":"PS039","nombre":"LUCAS VAZQUEZ AGUILAR"},{"clave":"PS040","nombre":"SOCORRO NUÑEZ LOPEZ"},{"clave":"PS041","nombre":"ELISA ROUX POLANCO"},{"clave":"PS042","nombre":"ELIZABETH PANTOJA COLLAZO"},{"clave":"PS044","nombre":"MA DEL CARMEN MUÑOZ ROJAS"},{"clave":"PS046","nombre":"ESPERANZA TOLENTINO HERNANDEZ"},{"clave":"PS047","nombre":"MA GUADALUPE RODRIGUEZ BALDERAS"},{"clave":"PS048","nombre":"MIRNA RIVERA RIVERA"},{"clave":"PS050","nombre":"IDALIA LEIJA RAMIREZ"},{"clave":"PS051","nombre":"MARIA GUADALUPE CUELLAS COVARRUBIAS"},{"clave":"PS053","nombre":"HERLINDA JIMENEZ ZUÑIGA"},{"clave":"PS054","nombre":"SOFIA MARTINEZ MORALES"},{"clave":"PS055","nombre":"MAGDALENA GREGORIO MORALES"},{"clave":"PS056","nombre":"ALBA LUZ SEGURA GOMEZ"},{"clave":"PS057","nombre":"ADELA HERNANDEZ TREJO"},{"clave":"PS058","nombre":"MAYRA ELIZABETH SANCHEZ HERNANDEZ"},{"clave":"PS059","nombre":"MARIA SANCHEZ RECENDIZ"},{"clave":"PS060","nombre":"FELISITAS SANTIAGO DE LA CRUZ"},{"clave":"PS061","nombre":"ELOISA MONTAÑO MENDOZA"},{"clave":"PS062","nombre":"MA. IMELDA OLAZARAN RAMIREZ"},{"clave":"PS063","nombre":"EMILIA DE LA CRUZ FRANCISCO"},{"clave":"PS064","nombre":"FELICITAS MENDOZA LOPEZ"},{"clave":"PS065","nombre":"ARCELA OLIVIA URIBE VAZQUEZ"},{"clave":"PS066","nombre":"MA SANTOS RODRIGUEZ RESENDIZ"},{"clave":"PS067","nombre":"CATALINA RODRIGUEZ FLORES"},{"clave":"PS069","nombre":"ARACELY MARTINEZ HERNANDEZ"},{"clave":"00436","nombre":"RAUL PUGA CASTRO"},{"clave":"00334","nombre":"GUADALUPE MORENO ALADINO"},{"clave":"00332","nombre":"FELIX ROBERTO SIFUENTES LEAL"},{"clave":"00331","nombre":"ERIKA JANET RIVERA PEÑA"},{"clave":"00330","nombre":"JANETH EUNICE OLVERA VAZQUEZ"},{"clave":"00335","nombre":"JESUS LEONEL MORALES RODRIGUEZ"},{"clave":"00333","nombre":"EMILIO HERNANDEZ BAEZ"},{"clave":"00324","nombre":"MAURO ERNESTO GARCIA ALMAZAN"},{"clave":"00413","nombre":"NORMA ALICIA ORTEGA OBREGON"},{"clave":"00319","nombre":"BEATRIZ ADRIANA GONZALEZ AREVALOS"},{"clave":"00320","nombre":"MARIA MAGDALENA ESCALANTE PEREZ"},{"clave":"00318","nombre":"GRACIELA GARCIA LEMUS"},{"clave":"00397","nombre":"SUGEY RIVERA CASTRO"},{"clave":"00408","nombre":"LILIA MABEL ZUÑIGA HERNANDEZ"},{"clave":"00422","nombre":"OSCAR ANTONIO CASTILLO PEREZ"},{"clave":"00323","nombre":"ALMA CONCEPCION BANDA PONCE"},{"clave":"00322","nombre":"DENNIS ARECHIGA AVILA"},{"clave":"00443","nombre":"MIGUEL ANGEL TOBIAS MARTINEZ"},{"clave":"00092","nombre":"JESUS CASTRO POZOS"},{"clave":"00149","nombre":"TITO GONZALO ROUX POLANCO"},{"clave":"00258","nombre":"OMAR RAMON DELGADO RODRIGUEZ"},{"clave":"PS012","nombre":"RUBEN GUERRERO AZUARA"},{"clave":"PS068","nombre":"MONICA GUERRERO GARCIA"},{"clave":"PS070","nombre":"MARIA VICTORIA MALDONADO RUIZ"},{"clave":"PS071","nombre":"IRMA AGUILAR OLVERA"},{"clave":"PS072","nombre":"MANUEL NEFTALI ZAVALA GUTIERREZ"},{"clave":"00316","nombre":"SHAYRA LIZET CASTELLANOS SALVADOR"},{"clave":"00317","nombre":"MARIA DEL CARMEN TORRES MARTINEZ"},{"clave":"00433","nombre":"ROSA ISELA CERNA ORTIZ"},{"clave":"00391","nombre":"JESUS ISRAEL GALVAN NETRO"},{"clave":"00404","nombre":"ARACELI DIAZ BARRON"},{"clave":"00325","nombre":"ALFONSO AGUILAR CRUZ"},{"clave":"00326","nombre":"ROBERTO ALFREDO LOPEZ LIMON"},{"clave":"00327","nombre":"ROEL RUBIN MARTINEZ ACOSTA"},{"clave":"00328","nombre":"EDGAR GOMEZ FLORES"},{"clave":"00329","nombre":"MARIO ELEAZAR CASANOVA SALINAS"},{"clave":"00398","nombre":"JAVIER CARRIZALES HERNANDEZ"},{"clave":"00399","nombre":"JUAN ANTONIO CASTILLO TOVAR"},{"clave":"00400","nombre":"FRANCISCO JAVIER LANDAVERDE CASTILLO"},{"clave":"00401","nombre":"SANTA BARBARITA ORTA MARTINEZ"},{"clave":"00402","nombre":"MANUEL UBER VILLESCAS DE LA CRUZ"},{"clave":"00429","nombre":"OSCAR EDUARDO GUTIERREZ PADILLA"},{"clave":"00432","nombre":"RUBEN OSMIN LEDEZMA HERNANDEZ"},{"clave":"00437","nombre":"BRENDA IVONE BOLADO FRANCISCO"},{"clave":"00321","nombre":"JUANA PEREZ BADILLO"},{"clave":"00336","nombre":"SERGIO ANTONIO SAUCEDO YERA"},{"clave":"00337","nombre":"YAIR FERNANDO BECERRA GONZALEZ"},{"clave":"00338","nombre":"MERCED VARGAS LOREDO"},{"clave":"00339","nombre":"MIGUEL ANGEL MORENO COLLAZO"},{"clave":"00340","nombre":"ODILON PEREZ RAMIREZ"},{"clave":"00341","nombre":"MYRNA GUADALUPE DELGADO ORTA"},{"clave":"00342","nombre":"SILVERIO COLLAZO REBULLOSA"},{"clave":"00343","nombre":"HILARIO REBOLLOSO GALLEGOS"},{"clave":"00344","nombre":"LEOPOLDO BARRIOS ORTEGA"},{"clave":"00345","nombre":"FRANCISCO JAVIER RODRIGUEZ HERNANDEZ"},{"clave":"00346","nombre":"OSCAR BUSTAMANTE SANCHEZ"},{"clave":"00347","nombre":"FELIPE DE JESUS SANCHEZ AVILA"},{"clave":"00348","nombre":"JUAN DAVID GOMEZ VAZQUEZ"},{"clave":"00349","nombre":"JUAN CARLOS HERNANDEZ CRUZ"},{"clave":"00350","nombre":"GREGORIO CABRALES SALAZAR"},{"clave":"00351","nombre":"FELIPE MARCELO PEREZ"},{"clave":"00352","nombre":"JUAN ANGEL MENDEZ TREJO"},{"clave":"00353","nombre":"GAUDENCIO GUADALUPE RAMIREZ"},{"clave":"00354","nombre":"ERNESTO VAZQUEZ CASTRO"},{"clave":"00355","nombre":"MARTIN MORALES HERNANDEZ"},{"clave":"00356","nombre":"JUAN ANTONIO ALEJO MORELOS"},{"clave":"00357","nombre":"LUIS ENRIQUE DEL ANGEL RODRIGUEZ"},{"clave":"00358","nombre":"JULISA HERNANDEZ PINTOR"},{"clave":"00359","nombre":"MIRNA PATRICIA RAMIREZ RODRIGUEZ"},{"clave":"00360","nombre":"MARCO ANTONIO ROCHA CHABACANO"},{"clave":"00361","nombre":"JUAN REYES GONZALEZ"},{"clave":"00362","nombre":"GELACIO FELIX"},{"clave":"00363","nombre":"MANUEL NUÑEZ CRUZ"},{"clave":"00364","nombre":"EDGAR DANIEL DEMES BARRON"},{"clave":"00365","nombre":"SERGIO BAEZ IBARRA"},{"clave":"00366","nombre":"EDUARDO AGUILERA FERRAL"},{"clave":"00367","nombre":"JORGE ARNNOL CARRILLO VAZQUEZ"},{"clave":"00368","nombre":"RICARDO GAMEZ GARDUÑO"},{"clave":"00370","nombre":"TOMAS CRUZ AQUINO"},{"clave":"00371","nombre":"CESAR LEAO CABRIALES PONCE"},{"clave":"00372","nombre":"PAUL ANTONIO MARTINEZ PEREZ"},{"clave":"00373","nombre":"JOSE DONATO LOPEZ HERNANDEZ"},{"clave":"00374","nombre":"JOSE ALEJANDRO PEREZ HERNANDEZ"},{"clave":"00375","nombre":"RAFAEL MENDOZA WEBER"},{"clave":"00376","nombre":"BRAYAN FERNANDO LEAL TAVARES"},{"clave":"00377","nombre":"JUAN JOSE AGUILAR MONTIEL"},{"clave":"00378","nombre":"JOSE DE JESUS GALLEGOS REYES"},{"clave":"00379","nombre":"EDUARDO MISAEL RAMOS TURRUBIATES"},{"clave":"00380","nombre":"JORGE ARMANDO VILLAFUERTE PANTOJA"},{"clave":"00381","nombre":"LUIS ENRIQUE DEL ANGEL CABRALES"},{"clave":"00382","nombre":"DANIEL RANGEL RODRIGUEZ"},{"clave":"00383","nombre":"JUAN JOSE DEL ANGEL DEL ANGEL"},{"clave":"00384","nombre":"JULIAN MENDO FLORES"},{"clave":"00385","nombre":"EDGAR AHUMADA GONZALEZ"},{"clave":"00386","nombre":"JESUS MATEOS HERNANDEZ"},{"clave":"00387","nombre":"LUIS MARTIN GONZALEZ ORTEGA"},{"clave":"00388","nombre":"JOEL ALEJO MORELOS"},{"clave":"00389","nombre":"MARTIN MARCELO PEREZ"},{"clave":"00390","nombre":"ROGELIO FERNANDEZ ZUÑIGA"},{"clave":"00394","nombre":"JOSE GUADALUPE ALMAZAN CASTILLO"},{"clave":"00396","nombre":"SILVIA SUGEY SAUCEDO BORJAS"},{"clave":"00403","nombre":"ERICK RAUL VAZQUEZ PEREZ"},{"clave":"00405","nombre":"TERESA GUADALUPE CRUZ DEL ANGEL"},{"clave":"00406","nombre":"RENE CRUZ JASSO"},{"clave":"00407","nombre":"ALBINO RICARDO RIVERA RIVAS"},{"clave":"00409","nombre":"MARTHA LETICIA HERNANDEZ LUNA"},{"clave":"00410","nombre":"ISABEL CRISTINA JIMENEZ JIMENEZ"},{"clave":"00412","nombre":"MARIA DOLORES CASTILLO RAMIREZ"},{"clave":"00414","nombre":"ENRIQUE ROSALES CASTILLO"},{"clave":"00415","nombre":"MARIA ANTONIA GONZALEZ DEL ANGEL"},{"clave":"00416","nombre":"LUIS ERNESTO VALDEZ CUELLAR"},{"clave":"00417","nombre":"CHRISTHIAN ALFONSO PADILLA MARTIN DEL CAMPO"},{"clave":"00418","nombre":"OMAR ALEJANDRO JIMENEZ BRICEÑO"},{"clave":"00419","nombre":"LUIS ANTONIO PECERO ALONSO"},{"clave":"00420","nombre":"JACOB ORTEGA SANCHEZ"},{"clave":"00421","nombre":"ROSY YERALDY LEAL RIVERA"},{"clave":"00423","nombre":"ROBERTO PADILLA MATA"},{"clave":"00424","nombre":"JOSUE GILBERTO CARRIZALES HERNANDEZ"},{"clave":"00425","nombre":"NESTOR CARLOS OLVERA GAMBOA"},{"clave":"00426","nombre":"DANIEL ISSAI HERRERA TRUJILLO"},{"clave":"00427","nombre":"CRESENCIO BALDERAS OCHOA"},{"clave":"00428","nombre":"RUBEN LEDEZMA SANTIAGO"},{"clave":"00430","nombre":"MIGUEL GERARDO CORTEZ OBREGON"},{"clave":"00431","nombre":"ALFREDO PEREZ SANCHEZ"},{"clave":"00434","nombre":"KARLA EDITH DOMINGUEZ HERNANDEZ"},{"clave":"00438","nombre":"SAUL GUADALUPE CERVANTES VILLAFUERTE"},{"clave":"00392","nombre":"DANIEL CAMACHO ANDABLO"},{"clave":"00393","nombre":"RICARDO HERNANDEZ CASTILLO"},{"clave":"00395","nombre":"JUAN CARLOS MORALES DUARTE"},{"clave":"00411","nombre":"ANGELICA CRUZ JARAMILLO"},{"clave":"00435","nombre":"TALHIA ILIANA RODRIGUEZ MUÑOZ"},{"clave":"00369","nombre":"VICTOR MANUEL GARCIA VAZQUEZ"},{"clave":"PS073","nombre":"MA. LUISA NAVA PALOMO"},{"clave":"00439","nombre":"FERNANDO MARTINEZ RODRIGUEZ"},{"clave":"PS074","nombre":"GLORIA HUERTA JUAREZ"},{"clave":"00440","nombre":"MILAGROS BERENICE LEDEZMA DE LEON"},{"clave":"PS075","nombre":"MARIA ELENA JIMENEZ ROBLEDO"},{"clave":"00444","nombre":"MARIA ANGELICA ORTIZ SOSA"},{"clave":"00443","nombre":"MIGUEL ANGEL TOBIAS MARTINEZ"},{"clave":"PS076","nombre":"LINA MAGDALENA MARTINEZ HERNANDEZ"},{"clave":"PS077","nombre":"MA. SAGRARIO RODRIGUEZ GONZALEZ"},{"clave":"PS078","nombre":"MARLENE DEL ANGEL ALMORA"}];
+const STORAGE_KEY = 'sutra_control_asistencia_v1';
+let registros = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+let historial = JSON.parse(localStorage.getItem(STORAGE_KEY + '_historial') || '[]');
+const $ = (id) => document.getElementById(id);
+const fmt = new Intl.DateTimeFormat('es-MX', { dateStyle:'full', timeStyle:'short' });
+const fecha = new Date();
+$('fechaHoy').textContent = fecha.toLocaleDateString('es-MX');
+function norm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().trim(); }
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(registros)); localStorage.setItem(STORAGE_KEY + '_historial', JSON.stringify(historial.slice(-80))); }
+function toast(msg) { const el=$('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1800); }
+function estadoTexto(v) { return v === 'asistencia' ? 'Asistencia' : v === 'incapacidad' ? 'Incapacidad' : v === 'economico' ? 'Día económico' : 'Sin registro'; }
+function estadoEmoji(v) { return v === 'asistencia' ? '✅' : v === 'incapacidad' ? '🩺' : v === 'economico' ? '🟡' : '⚪'; }
+function calc() {
+  const vals = Object.values(registros).map(r => r.estado);
+  const asistencia = vals.filter(v=>v==='asistencia').length;
+  const incapacidad = vals.filter(v=>v==='incapacidad').length;
+  const economico = vals.filter(v=>v==='economico').length;
+  const registrados = asistencia + incapacidad + economico;
+  const inasistencia = TRABAJADORES.length - registrados;
+  return { asistencia, incapacidad, economico, registrados, inasistencia, total:TRABAJADORES.length };
+}
+function updateStats() {
+  const c = calc();
+  $('totalTrab').textContent = c.total;
+  $('totalReg').textContent = c.registrados;
+  $('totalAsis').textContent = c.asistencia;
+  $('totalInas').textContent = c.inasistencia;
+  $('totalInc').textContent = c.incapacidad;
+  $('totalEco').textContent = c.economico;
+  $('progressBar').style.width = Math.round((c.registrados / c.total) * 100) + '%';
+  updateRecent();
+}
+function mark(clave, estado) {
+  const t = TRABAJADORES.find(x=>x.clave===clave); if(!t) return;
+  registros[clave] = { clave:t.clave, nombre:t.nombre, estado, hora:new Date().toISOString() };
+  historial.push({ clave:t.clave, nombre:t.nombre, estado, hora:new Date().toISOString() });
+  save(); updateStats(); renderResults(); toast(`${estadoEmoji(estado)} ${t.nombre}: ${estadoTexto(estado)}`);
+}
+function renderResults() {
+  const q = norm($('search').value);
+  let lista = !q ? TRABAJADORES.slice(0,12) : TRABAJADORES.filter(t => norm(t.nombre).includes(q) || norm(t.clave).includes(q)).slice(0,36);
+  $('results').innerHTML = lista.length ? lista.map(t => {
+    const estado = registros[t.clave]?.estado || '';
+    return `<article class="worker">
+      <div class="workerTop"><div><span class="clave">#${t.clave}</span><div class="name">${escapeHtml(t.nombre)}</div><span class="stateTag ${estado}">${estadoEmoji(estado)} ${estadoTexto(estado)}</span></div></div>
+      <div class="actions">
+        <button class="aAsis" onclick="mark('${escapeAttr(t.clave)}','asistencia')">✅ Asistencia</button>
+        <button class="aInc" onclick="mark('${escapeAttr(t.clave)}','incapacidad')">🩺 Incapacidad</button>
+        <button class="aEco" onclick="mark('${escapeAttr(t.clave)}','economico')">🟡 Día económico</button>
+      </div>
+    </article>`;
+  }).join('') : '<div class="empty">No se encontraron trabajadores con esa búsqueda.</div>';
+}
+function updateRecent() {
+  const ultimos = historial.slice(-12).reverse();
+  $('recentList').innerHTML = ultimos.length ? ultimos.map(r => `<div class="item"><div><b>${escapeHtml(r.nombre)}</b><br><span>#${escapeHtml(r.clave)} · ${estadoEmoji(r.estado)} ${estadoTexto(r.estado)}</span></div><span>${new Date(r.hora).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}</span></div>`).join('') : '<div class="empty">Aún no hay registros.</div>';
+}
+function groups() {
+  const g = { asistencia:[], incapacidad:[], economico:[], inasistencia:[] };
+  TRABAJADORES.forEach(t => {
+    const r = registros[t.clave];
+    const estado = r?.estado || 'inasistencia';
+    g[estado].push({...t, hora:r?.hora || ''});
+  });
+  return g;
+}
+function buildReport() {
+  const c = calc(), g = groups();
+  $('reportMeta').textContent = `${fmt.format(new Date())} · Total: ${c.total} · Registrados: ${c.registrados} · Inasistencias: ${c.inasistencia}`;
+  const section = (title, arr) => `<h3 class="sectionTitle">${title} (${arr.length})</h3><table><thead><tr><th>Clave</th><th>Nombre</th><th>Hora</th></tr></thead><tbody>${arr.map(x=>`<tr><td>${escapeHtml(x.clave)}</td><td>${escapeHtml(x.nombre)}</td><td>${x.hora ? new Date(x.hora).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}) : '-'}</td></tr>`).join('')}</tbody></table>`;
+  $('reportContent').innerHTML = `<p><b>Resumen:</b> Asistencias: ${c.asistencia} · Incapacidades: ${c.incapacidad} · Días económicos: ${c.economico} · Inasistencias: ${c.inasistencia}</p>` +
+    section('Asistencias', g.asistencia) + section('Incapacidades', g.incapacidad) + section('Días económicos', g.economico) + section('Inasistencias', g.inasistencia);
+  $('reportBox').classList.add('show');
+  $('reportBox').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function csvEscape(v) { v = String(v ?? ''); return /[",
+]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; }
+function exportCSV() {
+  const rows = [['CLAVE','NOMBRE','ESTATUS','HORA']];
+  TRABAJADORES.forEach(t => { const r = registros[t.clave]; rows.push([t.clave,t.nombre,estadoTexto(r?.estado), r?.hora ? new Date(r.hora).toLocaleString('es-MX') : '']); });
+  download(`reporte_asistencia_sutra_${new Date().toISOString().slice(0,10)}.csv`, rows.map(r=>r.map(csvEscape).join(',')).join('
+'), 'text/csv;charset=utf-8');
+}
+function exportJSON() { download(`respaldo_asistencia_sutra_${new Date().toISOString().slice(0,10)}.json`, JSON.stringify({registros,historial,fecha:new Date().toISOString()}, null, 2), 'application/json'); }
+function download(name, content, type) { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),900); }
+function escapeHtml(s) { return String(s).replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
+function escapeAttr(s) { return escapeHtml(s).replace(/`/g,'&#96;'); }
+$('search').addEventListener('input', renderResults);
+$('btnReport').addEventListener('click', buildReport);
+$('btnExport').addEventListener('click', exportCSV);
+$('btnJson').addEventListener('click', exportJSON);
+$('btnCopy').addEventListener('click', async () => {
+  const c=calc(); const txt=`Resumen SUTRA
+Total trabajadores: ${c.total}
+Registrados: ${c.registrados}
+Asistencias: ${c.asistencia}
+Incapacidades: ${c.incapacidad}
+Días económicos: ${c.economico}
+Inasistencias: ${c.inasistencia}`;
+  try { await navigator.clipboard.writeText(txt); toast('Resumen copiado'); } catch(e) { toast(txt); }
+});
+$('btnReset').addEventListener('click', () => { if(confirm('¿Deseas borrar todos los registros de asistencia guardados en este navegador?')) { registros={}; historial=[]; save(); updateStats(); renderResults(); $('reportBox').classList.remove('show'); toast('Registros reiniciados'); } });
+$('btnUndo').addEventListener('click', () => { const last=historial.pop(); if(!last) return toast('No hay registro para deshacer'); delete registros[last.clave]; for(let i=historial.length-1;i>=0;i--) { if(historial[i].clave===last.clave) { registros[last.clave] = historial[i]; break; } } save(); updateStats(); renderResults(); toast('Último registro deshecho'); });
+$('importJson').addEventListener('change', e => {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader(); reader.onload=()=>{ try { const data=JSON.parse(reader.result); registros=data.registros||{}; historial=data.historial||[]; save(); updateStats(); renderResults(); toast('Respaldo cargado'); } catch(err) { toast('Archivo JSON inválido'); } }; reader.readAsText(file);
+});
+updateStats(); renderResults();
+</script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#23451f" />
+  <title>Sistema de Control de Asistencia del SUTRA</title>
+  <style>
+    :root {
+      --verde:#23451f;
+      --verde-2:#386641;
+      --olivo:#6b7d32;
+      --olivo-2:#a7c957;
+      --crema:#f8f7ec;
+      --blanco:#ffffff;
+      --texto:#172115;
+      --muted:#65705f;
+      --linea:rgba(35,69,31,.18);
+      --shadow:0 18px 50px rgba(14,42,19,.18);
+      --radius:24px;
+    }
+    * { box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior:smooth; }
+    body {
+      margin:0; font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color:var(--texto); background:
+        radial-gradient(circle at top left, rgba(167,201,87,.32), transparent 34rem),
+        linear-gradient(135deg, #f8f7ec 0%, #eef5dc 45%, #e0ead0 100%);
+      min-height:100vh;
+    }
+    body::before {
+      content:""; position:fixed; inset:0; pointer-events:none; opacity:.22;
+      background-image:linear-gradient(30deg, rgba(35,69,31,.08) 12%, transparent 12.5%, transparent 87%, rgba(35,69,31,.08) 87.5%, rgba(35,69,31,.08)),
+        linear-gradient(150deg, rgba(35,69,31,.08) 12%, transparent 12.5%, transparent 87%, rgba(35,69,31,.08) 87.5%, rgba(35,69,31,.08));
+      background-size:42px 74px;
+    }
+    .app { width:min(1120px,100%); margin:0 auto; padding:18px clamp(14px,3vw,28px) 96px; position:relative; }
+    .hero {
+      position:relative; overflow:hidden; border-radius:32px; padding:22px; min-height:168px; color:#fff;
+      background:linear-gradient(135deg, #1e3c1b 0%, #386641 52%, #6b7d32 100%); box-shadow:var(--shadow);
+      isolation:isolate; animation:enter .65s ease both;
+    }
+    .hero::after {
+      content:""; position:absolute; width:320px; height:320px; border-radius:50%; right:-96px; top:-130px;
+      background:radial-gradient(circle, rgba(255,255,255,.30), rgba(255,255,255,0) 68%); z-index:-1;
+    }
+    .brand { display:flex; gap:16px; align-items:center; }
+    .logoBox { width:76px; height:76px; border-radius:22px; background:rgba(255,255,255,.16); display:grid; place-items:center; flex:0 0 auto; border:1px solid rgba(255,255,255,.34); box-shadow:0 12px 30px rgba(0,0,0,.16); overflow:hidden; }
+    .logoBox img { width:100%; height:100%; object-fit:contain; padding:8px; }
+    h1 { margin:0; font-size:clamp(1.35rem,4.8vw,2.8rem); line-height:1.05; letter-spacing:-.04em; }
+    .subtitle { margin:8px 0 0; opacity:.92; font-size:.98rem; }
+    .statusGrid { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-top:16px; }
+    .card { background:rgba(255,255,255,.92); border:1px solid rgba(255,255,255,.55); border-radius:22px; padding:15px; color:var(--texto); box-shadow:0 12px 30px rgba(16,58,24,.10); backdrop-filter: blur(10px); transform-origin:center; animation:pop .5s ease both; }
+    .card .label { font-size:.75rem; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+    .card .num { margin-top:4px; font-size:clamp(1.45rem,5vw,2.25rem); font-weight:950; line-height:1; color:var(--verde); }
+    .card small { display:block; margin-top:6px; color:var(--muted); font-weight:650; }
+    .progressShell { margin-top:15px; background:rgba(255,255,255,.25); border:1px solid rgba(255,255,255,.32); border-radius:999px; padding:5px; }
+    .progressBar { height:16px; width:0%; border-radius:999px; background:linear-gradient(90deg, #a7c957, #f2e9b8); box-shadow:0 0 0 1px rgba(255,255,255,.32) inset; transition:width .45s cubic-bezier(.2,.8,.2,1); }
+    .panel { margin-top:18px; background:rgba(255,255,255,.83); border:1px solid rgba(255,255,255,.74); border-radius:30px; padding:18px; box-shadow:var(--shadow); backdrop-filter:blur(12px); animation:enter .75s ease both; }
+    .toolbar { display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; }
+    .searchWrap { position:relative; }
+    .searchWrap input { width:100%; border:2px solid transparent; outline:none; border-radius:20px; background:#fff; padding:17px 18px 17px 48px; font-size:1.05rem; box-shadow:inset 0 0 0 1px var(--linea); transition:.2s ease; }
+    .searchWrap input:focus { border-color:var(--olivo-2); box-shadow:0 0 0 5px rgba(167,201,87,.24); }
+    .searchIcon { position:absolute; left:17px; top:50%; transform:translateY(-50%); font-size:1.15rem; }
+    button { border:0; border-radius:18px; padding:14px 16px; font-weight:900; cursor:pointer; transition:transform .12s ease, filter .2s ease, box-shadow .2s ease; font-size:.95rem; }
+    button:active { transform:scale(.97); }
+    .btnPrimary { background:linear-gradient(135deg, var(--verde), var(--verde-2)); color:#fff; box-shadow:0 12px 26px rgba(35,69,31,.22); }
+    .btnSoft { background:#eef4dc; color:var(--verde); box-shadow:inset 0 0 0 1px rgba(35,69,31,.12); }
+    .btnDanger { background:#fff0e6; color:#7c2d12; }
+    .results { display:grid; grid-template-columns:repeat(auto-fit,minmax(285px,1fr)); gap:12px; margin-top:16px; }
+    .worker { background:#fff; border:1px solid var(--linea); border-radius:24px; padding:16px; box-shadow:0 10px 26px rgba(16,58,24,.08); animation:rise .28s ease both; }
+    .workerTop { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .clave { display:inline-flex; align-items:center; gap:6px; padding:7px 10px; background:#eef4dc; color:var(--verde); border-radius:999px; font-weight:950; font-size:.82rem; white-space:nowrap; }
+    .name { font-size:1.02rem; font-weight:950; line-height:1.22; margin:9px 0 0; }
+    .stateTag { margin-top:8px; display:inline-flex; padding:7px 10px; border-radius:999px; font-weight:850; font-size:.82rem; background:#f4f6ef; color:var(--muted); }
+    .stateTag.asistencia { background:#e9f8d6; color:#315d14; }
+    .stateTag.incapacidad { background:#e9f1ff; color:#214c8d; }
+    .stateTag.economico { background:#fff7d6; color:#74570a; }
+    .actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:14px; }
+    .actions button { padding:12px 8px; border-radius:15px; font-size:.82rem; }
+    .aAsis { background:#e9f8d6; color:#315d14; }
+    .aInc { background:#e9f1ff; color:#214c8d; }
+    .aEco { background:#fff7d6; color:#74570a; }
+    .recent { margin-top:18px; display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .miniTitle { font-weight:950; color:var(--verde); margin:0 0 10px; display:flex; justify-content:space-between; gap:8px; }
+    .list { max-height:360px; overflow:auto; padding-right:4px; }
+    .item { display:flex; justify-content:space-between; gap:10px; align-items:center; padding:11px; border-radius:16px; background:#fff; border:1px solid var(--linea); margin-bottom:8px; }
+    .item b { font-size:.9rem; }
+    .item span { color:var(--muted); font-size:.78rem; font-weight:800; }
+    .reportBox { display:none; margin-top:18px; border-radius:24px; background:#fff; border:1px solid var(--linea); overflow:hidden; }
+    .reportBox.show { display:block; }
+    .reportHeader { padding:16px; background:linear-gradient(135deg,#eef4dc,#fff); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+    .reportContent { padding:16px; max-height:520px; overflow:auto; }
+    .sectionTitle { margin:18px 0 8px; color:var(--verde); font-size:1.02rem; }
+    table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    th,td { text-align:left; padding:10px; border-bottom:1px solid #e7edda; }
+    th { background:#f4f7e9; color:var(--verde); position:sticky; top:0; }
+    .toast { position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(20px); opacity:0; background:#1f3b1b; color:#fff; padding:12px 16px; border-radius:999px; box-shadow:0 18px 40px rgba(0,0,0,.25); font-weight:850; z-index:10; transition:.25s ease; pointer-events:none; max-width:92vw; text-align:center; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .empty { padding:24px; text-align:center; color:var(--muted); font-weight:800; }
+    .note { margin-top:10px; color:#41523d; font-size:.85rem; line-height:1.45; background:rgba(255,255,255,.65); border:1px dashed rgba(35,69,31,.25); border-radius:16px; padding:11px 12px; }
+    @keyframes enter { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+    @keyframes pop { from { opacity:0; transform:scale(.96); } to { opacity:1; transform:scale(1); } }
+    @keyframes rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    @media (max-width:860px) {
+      .statusGrid { grid-template-columns:repeat(3,1fr); }
+      .toolbar { grid-template-columns:1fr; }
+      .recent { grid-template-columns:1fr; }
+    }
+    @media (max-width:560px) {
+      .app { padding:12px 11px 90px; }
+      .hero { padding:16px; border-radius:26px; }
+      .brand { align-items:flex-start; gap:12px; }
+      .logoBox { width:62px; height:62px; border-radius:18px; }
+      .statusGrid { grid-template-columns:repeat(2,1fr); gap:9px; }
+      .card { padding:12px; border-radius:18px; }
+      .panel { border-radius:24px; padding:13px; }
+      .results { grid-template-columns:1fr; }
+      .actions { grid-template-columns:1fr; }
+      .searchWrap input { font-size:1rem; padding-top:15px; padding-bottom:15px; }
+      table { font-size:.78rem; }
+      th,td { padding:8px; }
+    }
+    @media print {
+      body { background:#fff; } .hero,.panel>.toolbar,.recent,.note,.toast,.progressShell { display:none!important; }
+      .app { padding:0; } .panel,.reportBox { display:block!important; box-shadow:none; border:0; } .reportContent { max-height:none; overflow:visible; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="brand">
+        <div class="logoBox"><img src="logo.png" alt="Logo SUTRA" onerror="this.style.display='none'; this.parentElement.innerHTML='SUTRA';"></div>
+        <div>
+          <h1>Sistema de Control de Asistencia del SUTRA</h1>
+          <p class="subtitle">Registro rápido por clave o nombre, con reporte final automático.</p>
+        </div>
+      </div>
+      <div class="statusGrid" aria-live="polite">
+        <div class="card"><div class="label">Total trabajadores</div><div class="num" id="totalTrab">0</div><small>Base cargada</small></div>
+        <div class="card"><div class="label">Registrados</div><div class="num" id="totalReg">0</div><small>Con estatus asignado</small></div>
+        <div class="card"><div class="label">Asistencias</div><div class="num" id="totalAsis">0</div><small>Presentes</small></div>
+        <div class="card"><div class="label">Inasistencias</div><div class="num" id="totalInas">0</div><small>No llamados/no marcados</small></div>
+        <div class="card"><div class="label">Incapacidades</div><div class="num" id="totalInc">0</div><small>Justificadas</small></div>
+        <div class="card"><div class="label">Días económicos</div><div class="num" id="totalEco">0</div><small>Permisos</small></div>
+      </div>
+      <div class="progressShell" title="Avance de registro"><div class="progressBar" id="progressBar"></div></div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div class="searchWrap">
+          <span class="searchIcon">🔎</span>
+          <input id="search" type="search" autocomplete="off" placeholder="Buscar por nombre o clave del trabajador..." />
+        </div>
+        <button class="btnSoft" id="btnReport">📋 Generar reporte</button>
+        <button class="btnPrimary" id="btnExport">⬇️ Exportar CSV</button>
+      </div>
+      <div class="note">Modo actual: registro local del navegador. Para que varias personas registren simultáneamente desde distintos celulares en GitHub Pages, se requiere conectar una base en línea como Firebase/Supabase; este archivo ya queda listo para funcionar como interfaz y exportar/importar reportes.</div>
+      <div class="results" id="results"></div>
+
+      <div class="recent">
+        <div>
+          <p class="miniTitle">Últimos registros <button class="btnSoft" id="btnUndo" style="padding:7px 10px;border-radius:12px;font-size:.78rem;">Deshacer último</button></p>
+          <div class="list" id="recentList"></div>
+        </div>
+        <div>
+          <p class="miniTitle">Herramientas <span id="fechaHoy"></span></p>
+          <div class="item"><b>Respaldo JSON</b><button class="btnSoft" id="btnJson">Guardar</button></div>
+          <div class="item"><b>Cargar respaldo</b><input id="importJson" type="file" accept="application/json" style="max-width:145px;"></div>
+          <div class="item"><b>Copiar resumen</b><button class="btnSoft" id="btnCopy">Copiar</button></div>
+          <div class="item"><b>Reiniciar registros</b><button class="btnDanger" id="btnReset">Limpiar</button></div>
+        </div>
+      </div>
+
+      <div class="reportBox" id="reportBox">
+        <div class="reportHeader">
+          <div><b>Reporte final de asistencia SUTRA</b><br><span id="reportMeta"></span></div>
+          <div><button class="btnSoft" onclick="window.print()">🖨️ Imprimir</button></div>
+        </div>
+        <div class="reportContent" id="reportContent"></div>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast"></div>
+
+<script>
+let trabajadores = [];
+
+async function cargarTrabajadores() {
+  const respuesta = await fetch("empleados_sutra.json");
+  const datos = await respuesta.json();
+
+  trabajadores = datos.empleados.map(e => ({
+    clave: String(e.clave).trim(),
+    nombre: String(e.nombre).trim()
+  }));
+
+  actualizarContadores();
+}
+document.addEventListener("DOMContentLoaded", cargarTrabajadores);
+
+const STORAGE_KEY = 'sutra_control_asistencia_v1';
+let registros = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+let historial = JSON.parse(localStorage.getItem(STORAGE_KEY + '_historial') || '[]');
+const $ = (id) => document.getElementById(id);
+const fmt = new Intl.DateTimeFormat('es-MX', { dateStyle:'full', timeStyle:'short' });
+const fecha = new Date();
+$('fechaHoy').textContent = fecha.toLocaleDateString('es-MX');
+function norm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().trim(); }
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(registros)); localStorage.setItem(STORAGE_KEY + '_historial', JSON.stringify(historial.slice(-80))); }
+function toast(msg) { const el=$('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1800); }
+function estadoTexto(v) { return v === 'asistencia' ? 'Asistencia' : v === 'incapacidad' ? 'Incapacidad' : v === 'economico' ? 'Día económico' : 'Sin registro'; }
+function estadoEmoji(v) { return v === 'asistencia' ? '✅' : v === 'incapacidad' ? '🩺' : v === 'economico' ? '🟡' : '⚪'; }
+function calc() {
+  const vals = Object.values(registros).map(r => r.estado);
+  const asistencia = vals.filter(v=>v==='asistencia').length;
+  const incapacidad = vals.filter(v=>v==='incapacidad').length;
+  const economico = vals.filter(v=>v==='economico').length;
+  const registrados = asistencia + incapacidad + economico;
+  const inasistencia = TRABAJADORES.length - registrados;
+  return { asistencia, incapacidad, economico, registrados, inasistencia, total:TRABAJADORES.length };
+}
+function updateStats() {
+  const c = calc();
+  $('totalTrab').textContent = c.total;
+  $('totalReg').textContent = c.registrados;
+  $('totalAsis').textContent = c.asistencia;
+  $('totalInas').textContent = c.inasistencia;
+  $('totalInc').textContent = c.incapacidad;
+  $('totalEco').textContent = c.economico;
+  $('progressBar').style.width = Math.round((c.registrados / c.total) * 100) + '%';
+  updateRecent();
+}
+function mark(clave, estado) {
+  const t = TRABAJADORES.find(x=>x.clave===clave); if(!t) return;
+  registros[clave] = { clave:t.clave, nombre:t.nombre, estado, hora:new Date().toISOString() };
+  historial.push({ clave:t.clave, nombre:t.nombre, estado, hora:new Date().toISOString() });
+  save(); updateStats(); renderResults(); toast(`${estadoEmoji(estado)} ${t.nombre}: ${estadoTexto(estado)}`);
+}
+function renderResults() {
+  const q = norm($('search').value);
+  let lista = !q ? TRABAJADORES.slice(0,12) : TRABAJADORES.filter(t => norm(t.nombre).includes(q) || norm(t.clave).includes(q)).slice(0,36);
+  $('results').innerHTML = lista.length ? lista.map(t => {
+    const estado = registros[t.clave]?.estado || '';
+    return `<article class="worker">
+      <div class="workerTop"><div><span class="clave">#${t.clave}</span><div class="name">${escapeHtml(t.nombre)}</div><span class="stateTag ${estado}">${estadoEmoji(estado)} ${estadoTexto(estado)}</span></div></div>
+      <div class="actions">
+        <button class="aAsis" onclick="mark('${escapeAttr(t.clave)}','asistencia')">✅ Asistencia</button>
+        <button class="aInc" onclick="mark('${escapeAttr(t.clave)}','incapacidad')">🩺 Incapacidad</button>
+        <button class="aEco" onclick="mark('${escapeAttr(t.clave)}','economico')">🟡 Día económico</button>
+      </div>
+    </article>`;
+  }).join('') : '<div class="empty">No se encontraron trabajadores con esa búsqueda.</div>';
+}
+function updateRecent() {
+  const ultimos = historial.slice(-12).reverse();
+  $('recentList').innerHTML = ultimos.length ? ultimos.map(r => `<div class="item"><div><b>${escapeHtml(r.nombre)}</b><br><span>#${escapeHtml(r.clave)} · ${estadoEmoji(r.estado)} ${estadoTexto(r.estado)}</span></div><span>${new Date(r.hora).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}</span></div>`).join('') : '<div class="empty">Aún no hay registros.</div>';
+}
+function groups() {
+  const g = { asistencia:[], incapacidad:[], economico:[], inasistencia:[] };
+  TRABAJADORES.forEach(t => {
+    const r = registros[t.clave];
+    const estado = r?.estado || 'inasistencia';
+    g[estado].push({...t, hora:r?.hora || ''});
+  });
+  return g;
+}
+function buildReport() {
+  const c = calc(), g = groups();
+  $('reportMeta').textContent = `${fmt.format(new Date())} · Total: ${c.total} · Registrados: ${c.registrados} · Inasistencias: ${c.inasistencia}`;
+  const section = (title, arr) => `<h3 class="sectionTitle">${title} (${arr.length})</h3><table><thead><tr><th>Clave</th><th>Nombre</th><th>Hora</th></tr></thead><tbody>${arr.map(x=>`<tr><td>${escapeHtml(x.clave)}</td><td>${escapeHtml(x.nombre)}</td><td>${x.hora ? new Date(x.hora).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}) : '-'}</td></tr>`).join('')}</tbody></table>`;
+  $('reportContent').innerHTML = `<p><b>Resumen:</b> Asistencias: ${c.asistencia} · Incapacidades: ${c.incapacidad} · Días económicos: ${c.economico} · Inasistencias: ${c.inasistencia}</p>` +
+    section('Asistencias', g.asistencia) + section('Incapacidades', g.incapacidad) + section('Días económicos', g.economico) + section('Inasistencias', g.inasistencia);
+  $('reportBox').classList.add('show');
+  $('reportBox').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function csvEscape(v) {
+  v = String(v ?? '');
+  return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+}
+function exportCSV() {
+  const rows = [['CLAVE','NOMBRE','ESTATUS','HORA']];
+  TRABAJADORES.forEach(t => {
+    const r = registros[t.clave];
+    rows.push([t.clave, t.nombre, estadoTexto(r?.estado), r?.hora ? new Date(r.hora).toLocaleString('es-MX') : '']);
+  });
+  const csv = rows.map(r => r.map(csvEscape).join(',')).join('\n');
+  download(`reporte_asistencia_sutra_${new Date().toISOString().slice(0,10)}.csv`, csv, 'text/csv;charset=utf-8');
+}
+function exportJSON() { download(`respaldo_asistencia_sutra_${new Date().toISOString().slice(0,10)}.json`, JSON.stringify({registros,historial,fecha:new Date().toISOString()}, null, 2), 'application/json'); }
+function download(name, content, type) { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),900); }
+function escapeHtml(s) { return String(s).replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
+function escapeAttr(s) { return escapeHtml(s).replace(/`/g,'&#96;'); }
+$('search').addEventListener('input', renderResults);
+$('btnReport').addEventListener('click', buildReport);
+$('btnExport').addEventListener('click', exportCSV);
+$('btnJson').addEventListener('click', exportJSON);
+$('btnCopy').addEventListener('click', async () => {
+  const c=calc(); const txt=`Resumen SUTRA
+Total trabajadores: ${c.total}
+Registrados: ${c.registrados}
+Asistencias: ${c.asistencia}
+Incapacidades: ${c.incapacidad}
+Días económicos: ${c.economico}
+Inasistencias: ${c.inasistencia}`;
+  try { await navigator.clipboard.writeText(txt); toast('Resumen copiado'); } catch(e) { toast(txt); }
+});
+$('btnReset').addEventListener('click', () => { if(confirm('¿Deseas borrar todos los registros de asistencia guardados en este navegador?')) { registros={}; historial=[]; save(); updateStats(); renderResults(); $('reportBox').classList.remove('show'); toast('Registros reiniciados'); } });
+$('btnUndo').addEventListener('click', () => { const last=historial.pop(); if(!last) return toast('No hay registro para deshacer'); delete registros[last.clave]; for(let i=historial.length-1;i>=0;i--) { if(historial[i].clave===last.clave) { registros[last.clave] = historial[i]; break; } } save(); updateStats(); renderResults(); toast('Último registro deshecho'); });
+$('importJson').addEventListener('change', e => {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader(); reader.onload=()=>{ try { const data=JSON.parse(reader.result); registros=data.registros||{}; historial=data.historial||[]; save(); updateStats(); renderResults(); toast('Respaldo cargado'); } catch(err) { toast('Archivo JSON inválido'); } }; reader.readAsText(file);
+});
+updateStats(); renderResults();
+</script>
+</body>
+</html>

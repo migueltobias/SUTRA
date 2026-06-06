@@ -1,39 +1,3 @@
-{
-  "empleados": [
-    {
-      "clave": "00315",
-      "nombre": "LORENA PEREZ MUÑIZ"
-    },
-    {
-      "clave": "00441",
-      "nombre": "MARIA DE LOURDES ALVARADO MOJICA"
-    },
-    {
-      "clave": "00442",
-      "nombre": "MARISOL BARBERENA GONZALEZ"
-    },
-    {
-      "clave": "00001",
-      "nombre": "ENRIQUE SALINAS CONTRERAS"
-    },
-    {
-      "clave": "00002",
-      "nombre": "HERIBERTO MARTINEZ GARCIA"
-    },
-    {
-      "clave": "00003",
-      "nombre": "GERARDO ANTONIO ORTA PACHECO"
-    },
-    {
-      "clave": "00004",
-      "nombre": "JOSE SANTOS MORALES VAZQUEZ"
-    },
-    {
-      "clave": "00006",
-      "nombre": "ANDREA CRUZ SOLIS"
-    },
-    {
-      "clave": "00007",
       "nombre": "ARTURO HERNANDEZ ALVAREZ"
     },
     {
